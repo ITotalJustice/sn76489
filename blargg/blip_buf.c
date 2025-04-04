@@ -109,12 +109,44 @@ static void check_assumptions( void )
 	assert( blip_max_frame <= (fixed_t) -1 >> time_bits );
 }
 
+static unsigned blip_alloc_size(int size)
+{
+	return sizeof(blip_t) + (size + buf_extra) * sizeof (buf_t);
+}
+
+unsigned blip_state_size(const blip_t* m)
+{
+	return blip_alloc_size(m->size);
+}
+
+int blip_save_state(const blip_t* m, void* buf, unsigned size)
+{
+	if (size < blip_state_size(m))
+	{
+		return 1;
+	}
+
+	memcpy(buf, m, blip_state_size(m));
+	return 0;
+}
+
+int blip_load_state(blip_t* m, const void* buf, unsigned size)
+{
+	if (size < blip_state_size(m))
+	{
+		return 1;
+	}
+
+	memcpy(m, buf, blip_state_size(m));
+	return 0;
+}
+
 blip_t* blip_new( int size )
 {
 	blip_t* m;
 	assert( size >= 0 );
 
-	m = (blip_t*) malloc( sizeof *m + (size + buf_extra) * sizeof (buf_t) );
+	m = (blip_t*) malloc( blip_alloc_size(size) );
 	if ( m )
 	{
 		m->factor = time_unit / blip_max_ratio;

@@ -101,4 +101,20 @@ void blip_wrap_set_treble(blip_wrap_t* b, double treble_db)
     b->synth_good.treble_eq(treble_db);
 }
 
+// todo: implement for blip_buffer.
+unsigned blip_wrap_state_size(const blip_wrap_t* b)
+{
+    return 0;
+}
+
+int blip_wrap_save_state(const blip_wrap_t* b, void* buf, unsigned size)
+{
+    return 0;
+}
+
+int blip_wrap_load_state(blip_wrap_t* b, const void* buf, unsigned size)
+{
+    return 0;
+}
+
 } // extern "C"

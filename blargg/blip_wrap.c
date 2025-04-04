@@ -113,3 +113,48 @@ void blip_wrap_set_bass(blip_wrap_t* b, int frequency)
 void blip_wrap_set_treble(blip_wrap_t* b, double treble_db)
 {
 }
+
+unsigned blip_wrap_state_size(const blip_wrap_t* b)
+{
+    return blip_state_size(b->buf[0]) * 2;
+}
+
+int blip_wrap_save_state(const blip_wrap_t* b, void* buf, unsigned size)
+{
+    if (size < blip_wrap_state_size(b))
+    {
+        return 1;
+    }
+
+    const unsigned state_size = blip_state_size(b->buf[0]);
+    if (blip_save_state(b->buf[0], buf, state_size) < 0)
+    {
+        return 1;
+    }
+    if (blip_save_state(b->buf[1], (uint8_t*)buf + state_size, state_size) < 0)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+int blip_wrap_load_state(blip_wrap_t* b, const void* buf, unsigned size)
+{
+    if (size < blip_wrap_state_size(b))
+    {
+        return -1;
+    }
+
+    const unsigned state_size = blip_state_size(b->buf[0]);
+    if (blip_load_state(b->buf[0], buf, state_size) < 0)
+    {
+        return -1;
+    }
+    if (blip_load_state(b->buf[1], (const uint8_t*)buf + state_size, state_size) < 0)
+    {
+        return -1;
+    }
+
+    return 0;
+}

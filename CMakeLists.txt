@@ -8,7 +8,7 @@ option(SN76489_CXX
 
 
 project(sn76489
-    VERSION 1.0.0
+    VERSION 1.1.0
     LANGUAGES C
 )
 

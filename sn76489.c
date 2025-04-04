@@ -76,6 +76,7 @@ struct Sn76489
     /* end. */
 
     blip_wrap_t* blip;
+
     float channel_volume[4];
     unsigned lfsr_tapped_bit;
     unsigned lfsr_feed_bit;
@@ -477,27 +478,48 @@ static_assert(offsetof(Sn76489, latched_type) == 109, "bad latched_type offset, 
 static_assert(offsetof(Sn76489, _padding) == 110, "bad _padding offset, save states broken!");
 static_assert(offsetof(Sn76489, blip) == 112, "bad blip offset, save states broken!");
 
-unsigned psg_state_size(void)
+unsigned psg_state_size(const Sn76489* psg, int include_blip)
 {
-    return offsetof(Sn76489, blip);
+    unsigned base_size = offsetof(Sn76489, blip);
+    if (include_blip)
+    {
+        base_size += blip_wrap_state_size(psg->blip);
+    }
+    return base_size;
 }
 
-int psg_save_state(const Sn76489* psg, void* data, unsigned size)
+int psg_save_state(const Sn76489* psg, void* data, unsigned size, int include_blip)
 {
-    if (!psg || !data || size < psg_state_size())
+    if (!psg || !data || size < psg_state_size(psg, include_blip))
     {
         return 1;
     }
 
-    return !memcpy(data, psg, psg_state_size());
+    const unsigned base_size = psg_state_size(psg, 0);
+    memcpy(data, psg, base_size);
+
+    if (include_blip)
+    {
+        blip_wrap_save_state(psg->blip, (uint8_t*)data + base_size, size - base_size);
+    }
+
+    return 0;
 }
 
-int psg_load_state(Sn76489* psg, const void* data, unsigned size)
+int psg_load_state(Sn76489* psg, const void* data, unsigned size, int include_blip)
 {
-    if (!psg || !data || size < psg_state_size())
+    if (!psg || !data || size < psg_state_size(psg, include_blip))
     {
         return 1;
     }
 
-    return !memcpy(psg, data, psg_state_size());
+    const unsigned base_size = psg_state_size(psg, 0);
+    memcpy(psg, data, base_size);
+
+    if (include_blip)
+    {
+        blip_wrap_load_state(psg->blip, (const uint8_t*)data + base_size, size - base_size);
+    }
+
+    return 0;
 }

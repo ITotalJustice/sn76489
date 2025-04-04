@@ -68,12 +68,12 @@ void psg_clear_samples(Sn76489*);
 /* ------------------------- */
 /* ------SaveState Api------ */
 /* ------------------------- */
-/* returns the size needed for savestates. */
-unsigned psg_state_size(void);
+/* returns the size needed for savestates, if include_blip=0, Sn76489 can be NULL. */
+unsigned psg_state_size(const Sn76489*, int include_blip);
 /* creates a savestate, returns 0 on success. */
-int psg_save_state(const Sn76489*, void* data, unsigned size);
+int psg_save_state(const Sn76489*, void* data, unsigned size, int include_blip);
 /* loads a savestate, returns 0 on success. */
-int psg_load_state(Sn76489*, const void* data, unsigned size);
+int psg_load_state(Sn76489*, const void* data, unsigned size, int include_blip);
 
 #ifdef __cplusplus
 }

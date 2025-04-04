@@ -25,6 +25,11 @@ void blip_wrap_set_volume(blip_wrap_t*, float volume);
 void blip_wrap_set_bass(blip_wrap_t*, int frequency);
 void blip_wrap_set_treble(blip_wrap_t*, double treble_db);
 
+// only available when using blip_buf.c
+unsigned blip_wrap_state_size(const blip_wrap_t* b);
+int blip_wrap_save_state(const blip_wrap_t* b, void* buf, unsigned size);
+int blip_wrap_load_state(blip_wrap_t* b, const void* buf, unsigned size);
+
 #ifdef __cplusplus
 }
 #endif
