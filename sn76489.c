@@ -154,14 +154,14 @@ static void channel_sync_psg(Sn76489* psg, unsigned num, unsigned time)
     // get new timestamp
     const unsigned new_timestamp = time;
     // calculate how many cycles have elapsed since last sync
-    const unsigned until = new_timestamp - c->timestamp;
+    const int until = new_timestamp - c->timestamp;
     // advance forward
     c->clock += until;
     // save new timestamp
     c->timestamp = new_timestamp;
 
     // already clocked on this cycle.
-    if (!until)
+    if (until <= 0)
     {
         return;
     }
