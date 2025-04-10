@@ -149,24 +149,26 @@ static void channel_sync_psg(Sn76489* psg, unsigned num, unsigned time)
 
     // get starting point
     const unsigned base_clock = c->clock;
-    // i am not 100% sure how this works, but trust me, it works
+    // this is the time at which the sample is first generated.
     unsigned from = base_clock + c->frequency_timer;
     // get new timestamp
     const unsigned new_timestamp = time;
     // calculate how many cycles have elapsed since last sync
-    const int until = new_timestamp - c->timestamp;
+    const unsigned until = new_timestamp - c->timestamp;
     // advance forward
     c->clock += until;
     // save new timestamp
     c->timestamp = new_timestamp;
 
-    // already clocked on this cycle, or bad timestamp.
-    if (until <= 0)
+    // already clocked on this cycle.
+    if (!until)
     {
         return;
     }
 
-    // clip clock range
+    // if the timer is greater than until, then the channel will not be ticked.
+    // a sample is still generated (as the volume / enable may have changed).
+    // so, the actual sample start (from) is updated to the end (until).
     if (c->frequency_timer > until)
     {
         from = base_clock + until;
@@ -178,7 +180,15 @@ static void channel_sync_psg(Sn76489* psg, unsigned num, unsigned time)
         return;
     }
 
-    const int sample = blip_apply_volume_to_sample(psg->blip, VOLUME_TABLE[c->volume], psg->channel_volume[num]);
+    // the volume decays to 0 over time. This would be quite expensive to emulate
+    // and so the average volume for tone channels is halved, whilst the noise channel
+    // remains the same due to it being updated frequently.
+    // this is why the noise channel sounds much louder on actual hardware.
+    // https://www.smspower.org/Development/SN76489#EmulatingImperfection
+    const int volume_div = num == ChannelType_NOISE ? 1 : 2;
+    const int volume = VOLUME_TABLE[c->volume] / volume_div;
+
+    const int sample = blip_apply_volume_to_sample(psg->blip, volume, psg->channel_volume[num]);
     const int sample_left = sample * c->enabled[0];
     const int sample_right = sample * c->enabled[1];
 
